@@ -1,12 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/text_service.dart';
 import 'package:flutter_application_1/pages/ticket.dart';
+import 'package:flutter_application_1/pages/my_account.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
 
+
 class _HomeState extends State<Home> {
+  
+    List<MyAccount>? myAccount;
+  void initState() {
+    super.initState();
+    getDataTicket().then((acc)=>{myAccount=acc,print(acc[0].tktStatus)});
+    print(myAccount);
+  }
+
+  Future<List<MyAccount>> getDataTicket() async {
+    final userid = TextUser().userid; // ดึงค่า userid จาก TextUser class
+    final apiUrl =
+        Uri.parse("http://dekdee2.informatics.buu.ac.th:8002/mongoose/get/stts_tickets");
+    final response = await http.post(
+      apiUrl,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "where": {
+          "tkt_act": userid, // ใช้ค่า userid จาก TextUser
+          "tkt_delete": {"\$ne": "true"},
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> Imposter=json.decode(response.body);
+     
+      return Imposter.map((check)=>MyAccount.fromJson(check)).toList();
+    } else {
+      throw Exception("Failed to load");
+    }
+  }
+
+
+
   int _ticketCount = 0; // Variable to store ticket count
 
   final ButtonStyle buttonPrimary = ElevatedButton.styleFrom(
@@ -157,7 +199,7 @@ class _HomeState extends State<Home> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '0',
+                                '$_ticketCount',
                                 style: TextStyle(
                                   fontSize: 50,
                                   fontWeight: FontWeight.bold,

@@ -4,6 +4,7 @@ import 'package:flutter_application_1/components/my_button.dart';
 import 'package:flutter_application_1/components/textfield.dart';
 import 'package:flutter_application_1/pages/home-page.dart';
 import 'package:flutter_application_1/pages/onboarding.dart';
+import 'package:flutter_application_1/pages/text_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -29,6 +30,10 @@ class _LoginPageState extends State<LoginPage> {
         }));
 
     if (response.statusCode == 200) {
+      String user=response.body;
+      Map<String,dynamic> data=json.decode(user);
+      String id =data['user']['id'];
+      TextUser().userid=id;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Login successfully!"),
       ));
@@ -43,7 +48,8 @@ class _LoginPageState extends State<LoginPage> {
         content: Text("Failed to Login !"),
       ));
     }
-    print(response.statusCode);
+    print(response.body);
+    
   }
 
   @override
