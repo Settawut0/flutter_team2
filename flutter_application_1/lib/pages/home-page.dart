@@ -17,8 +17,26 @@ class _HomeState extends State<Home> {
     List<MyAccount>? myAccount;
   void initState() {
     super.initState();
-    getDataTicket().then((acc)=>{myAccount=acc,print(acc[0].tktStatus)});
-    print(myAccount);
+    getDataTicket().then((acc) {
+    myAccount = acc;
+    int openCount = 0;
+    int closeCount = 0;
+    int ticketCount = 0;
+    for (int i = 0; i < acc.length; i++) {
+      if (acc[i].tktStatus == "Open") {
+        openCount++;
+      } else if (acc[i].tktStatus == "Closed"||acc[i].tktStatus == "Closed Bug") {
+        closeCount++;
+      }
+      ticketCount++;
+
+    }
+    setState(() {
+      _ticketOpen = openCount;
+      _ticketClose = closeCount;
+      _ticketCount = ticketCount;
+    });
+  });
   }
 
   Future<List<MyAccount>> getDataTicket() async {
@@ -50,6 +68,8 @@ class _HomeState extends State<Home> {
 
 
   int _ticketCount = 0; // Variable to store ticket count
+  int _ticketOpen = 0; // Variable to store ticket count
+  int _ticketClose = 0; // Variable to store ticket count
 
   final ButtonStyle buttonPrimary = ElevatedButton.styleFrom(
     minimumSize: Size(200, 55),
@@ -199,7 +219,7 @@ class _HomeState extends State<Home> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '$_ticketCount',
+                                '$_ticketOpen',
                                 style: TextStyle(
                                   fontSize: 50,
                                   fontWeight: FontWeight.bold,
@@ -263,7 +283,7 @@ class _HomeState extends State<Home> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '0',
+                                '$_ticketClose',
                                 style: TextStyle(
                                   fontSize: 50,
                                   fontWeight: FontWeight.bold,
@@ -295,15 +315,8 @@ class _HomeState extends State<Home> {
                   MaterialPageRoute(
                     builder: (context) => TicketForm(),
                   ),
-                ).then((ticket) {
-                  // Handle the returned Ticket object here
-                  if (ticket != null) {
-                    setState(() {
-                      // Increment the ticket count
-                      _ticketCount++;
-                    });
-                  }
-                });
+              
+                );
               },
               style: buttonPrimary,
               child: Text(

@@ -1,5 +1,9 @@
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/home-page.dart';
+import 'package:flutter_application_1/pages/onboarding.dart';
+import 'package:flutter_application_1/pages/text_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class TicketForm extends StatefulWidget {
   @override
@@ -32,8 +36,8 @@ class _TicketFormState extends State<TicketForm> {
         title: Text(
           'New Ticket',
           style: TextStyle(
-            fontSize: 25, // เปลี่ยนขนาดตัวหนังสือ
-            fontWeight: FontWeight.bold, // ทำให้ตัวหนังสือหนาขึ้น
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -54,11 +58,8 @@ class _TicketFormState extends State<TicketForm> {
             Text(
               'Type',
               style: TextStyle(
-                fontSize: 18, // เปลี่ยนขนาดตัวหนังสือ
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-
-                // ทำให้ตัวหนังสือหนาขึ้น
-                // ตั้งสีข้อความเป็นสีขาว
               ),
             ),
             DropdownButtonFormField<String>(
@@ -80,11 +81,10 @@ class _TicketFormState extends State<TicketForm> {
             Text(
               'Priority',
               style: TextStyle(
-                fontSize: 18, // เปลี่ยนขนาดตัวหนังสือ
-                fontWeight: FontWeight.bold, // ทำให้ตัวหนังสือหนาขึ้น
-                // ตั้งสีข้อความเป็นสีขาว
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-            ), // Adjusted height here
+            ),
             DropdownButtonFormField<String>(
               value: _selectedPriority,
               hint: Text('Select Priority'),
@@ -100,7 +100,7 @@ class _TicketFormState extends State<TicketForm> {
                 );
               }).toList(),
             ),
-            SizedBox(height: 5.0), // Add space between Type and Description
+            SizedBox(height: 5.0),
             TextFormField(
               controller: _descriptionController,
               maxLines: 5,
@@ -120,24 +120,22 @@ class _TicketFormState extends State<TicketForm> {
                     Navigator.pop(context); // Close the current page
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors
-                        .blueGrey[900], // Set background color to blueGrey
+                    backgroundColor: Colors.blueGrey[900],
                   ),
                   child: Text(
                     "Cancel",
                     style: TextStyle(
-                      color: Colors.white, // Set text color to white
+                      color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                SizedBox(width: 10), // Add space between buttons
+                SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: _submitForm, // Call _submitForm function
+                  onPressed: _submitForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.green, // Set background color to green
+                    backgroundColor: Colors.green,
                   ),
                   child: Text(
                     "Submit",
@@ -165,7 +163,6 @@ class _TicketFormState extends State<TicketForm> {
         description.isEmpty ||
         _selectedType == null ||
         _selectedPriority == null) {
-      // Show alert dialog
       showDialog(
         context: context,
         builder: (context) {
@@ -175,7 +172,7 @@ class _TicketFormState extends State<TicketForm> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                 },
                 child: Text('OK'),
               ),
@@ -183,11 +180,69 @@ class _TicketFormState extends State<TicketForm> {
           );
         },
       );
-      return; // Exit the function early
+      return;
     }
 
-    Ticket ticket = Ticket(title: title, description: description);
-    Navigator.pop(context, ticket); // Return Ticket object to previous page
+
+    signUserIn(context);
+  }
+
+  Future<void> signUserIn(BuildContext context) async {
+    final apiUrl = Uri.parse(
+        "http://dekdee2.informatics.buu.ac.th:8002/mongoose/insert/stts_tickets");
+
+    String userId = TextUser().userid; // You need to implement TextUser class
+
+    DateTime now = DateTime.now();
+    String formattedDate ="${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    String ticketNumber = "TKT-${now.day.toString().padLeft(2, '0')}${now.month.toString().padLeft(2, '0')}${now.year}${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}${now.millisecond.toString().padLeft(3, '0')}";
+
+    Map<String, dynamic> ticketData = {
+      "tkt_picture": null,
+      "tkt_time": formattedDate,
+      "tkt_last_update": formattedDate,
+      "tkt_number": ticketNumber,
+      "tkt_act": userId,
+      "tkt_status": "Pending",
+      "tkt_book": false,
+      "tkt_delete": false,
+      "tkt_title": _titleController.text,
+      "tkt_description": _descriptionController.text,
+      "tkt_types": _selectedType,
+      "tkt_priorities": _selectedPriority,
+    };
+
+    try {
+      http.Response response = await http.post(
+        apiUrl,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"data": ticketData}),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Ticket submitted successfully!"),
+        ));
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                Onboarding()), // Assuming MyHomePage is the name of your home page class
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Failed to submit ticket!"),
+        ));
+      }
+
+      print(response.body);
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("An error occurred while submitting ticket!"),
+      ));
+    }
   }
 
   @override

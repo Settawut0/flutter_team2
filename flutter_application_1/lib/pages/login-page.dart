@@ -7,6 +7,8 @@ import 'package:flutter_application_1/pages/onboarding.dart';
 import 'package:flutter_application_1/pages/text_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
+
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
