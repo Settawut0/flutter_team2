@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/content_model.dart';
 import 'package:flutter_application_1/pages/home-page.dart';
 import 'package:lottie/lottie.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class Onboarding extends StatefulWidget {
   @override
@@ -140,5 +141,10 @@ class _OnboardingState extends State<Onboarding> {
         color: Theme.of(context).primaryColor,
       ),
     );
+  }
+
+  Future<InitializationStatus> _initGoogleMobileAds() {
+    // TODO: Initialize Google Mobile Ads SDK
+    return MobileAds.instance.initialize();
   }
 }

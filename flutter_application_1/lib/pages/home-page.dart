@@ -4,45 +4,62 @@ import 'package:flutter_application_1/pages/ticket.dart';
 import 'package:flutter_application_1/pages/my_account.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_application_1/pages/ad_helper.dart';
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
 
-
 class _HomeState extends State<Home> {
-  
-    List<MyAccount>? myAccount;
+  BannerAd? _bannerAd;
+
+  List<MyAccount>? myAccount;
   void initState() {
     super.initState();
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
     getDataTicket().then((acc) {
-    myAccount = acc;
-    int openCount = 0;
-    int closeCount = 0;
-    int ticketCount = 0;
-    for (int i = 0; i < acc.length; i++) {
-      if (acc[i].tktStatus == "Open") {
-        openCount++;
-      } else if (acc[i].tktStatus == "Closed"||acc[i].tktStatus == "Closed Bug") {
-        closeCount++;
+      myAccount = acc;
+      int openCount = 0;
+      int closeCount = 0;
+      int ticketCount = 0;
+      for (int i = 0; i < acc.length; i++) {
+        if (acc[i].tktStatus == "Open") {
+          openCount++;
+        } else if (acc[i].tktStatus == "Closed" ||
+            acc[i].tktStatus == "Closed Bug") {
+          closeCount++;
+        }
+        ticketCount++;
       }
-      ticketCount++;
-
-    }
-    setState(() {
-      _ticketOpen = openCount;
-      _ticketClose = closeCount;
-      _ticketCount = ticketCount;
+      setState(() {
+        _ticketOpen = openCount;
+        _ticketClose = closeCount;
+        _ticketCount = ticketCount;
+      });
     });
-  });
   }
 
   Future<List<MyAccount>> getDataTicket() async {
     final userid = TextUser().userid; // ดึงค่า userid จาก TextUser class
-    final apiUrl =
-        Uri.parse("http://dekdee2.informatics.buu.ac.th:8002/mongoose/get/stts_tickets");
+    final apiUrl = Uri.parse(
+        "http://dekdee2.informatics.buu.ac.th:8002/mongoose/get/stts_tickets");
     final response = await http.post(
       apiUrl,
       headers: {
@@ -57,15 +74,13 @@ class _HomeState extends State<Home> {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> Imposter=json.decode(response.body);
-     
-      return Imposter.map((check)=>MyAccount.fromJson(check)).toList();
+      List<dynamic> Imposter = json.decode(response.body);
+
+      return Imposter.map((check) => MyAccount.fromJson(check)).toList();
     } else {
       throw Exception("Failed to load");
     }
   }
-
-
 
   int _ticketCount = 0; // Variable to store ticket count
   int _ticketOpen = 0; // Variable to store ticket count
@@ -315,7 +330,6 @@ class _HomeState extends State<Home> {
                   MaterialPageRoute(
                     builder: (context) => TicketForm(),
                   ),
-              
                 );
               },
               style: buttonPrimary,
@@ -328,9 +342,26 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
+            if (_bannerAd != null)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd!),
+                ),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: Dispose a BannerAd object
+    _bannerAd?.dispose();
+
+    super.dispose();
   }
 }
