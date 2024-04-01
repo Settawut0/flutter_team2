@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/home-page.dart';
 import 'package:flutter_application_1/pages/onboarding.dart';
 import 'package:flutter_application_1/pages/text_service.dart';
 import 'package:http/http.dart' as http;
@@ -223,15 +224,14 @@ class _TicketFormState extends State<TicketForm> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Ticket submitted successfully!"),
         ));
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //       builder: (context) =>
-        //           Onboarding()
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  Home()
 
-        //           ), // Assuming MyHomePage is the name of your home page class
-        // );
-        Navigator.pop(context);
+                  ), // Assuming MyHomePage is the name of your home page class
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Failed to submit ticket!"),
