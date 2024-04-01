@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/onboarding.dart';
 import 'package:flutter_application_1/pages/text_service.dart';
@@ -180,9 +179,7 @@ class _TicketFormState extends State<TicketForm> {
           );
         },
       );
-      return;
     }
-
 
     signUserIn(context);
   }
@@ -194,9 +191,11 @@ class _TicketFormState extends State<TicketForm> {
     String userId = TextUser().userid; // You need to implement TextUser class
 
     DateTime now = DateTime.now();
-    String formattedDate ="${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    String formattedDate =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    String ticketNumber = "TKT-${now.day.toString().padLeft(2, '0')}${now.month.toString().padLeft(2, '0')}${now.year}${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}${now.millisecond.toString().padLeft(3, '0')}";
+    String ticketNumber =
+        "TKT-${now.day.toString().padLeft(2, '0')}${now.month.toString().padLeft(2, '0')}${now.year}${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}${now.millisecond.toString().padLeft(3, '0')}";
 
     Map<String, dynamic> ticketData = {
       "tkt_picture": null,
@@ -224,12 +223,15 @@ class _TicketFormState extends State<TicketForm> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Ticket submitted successfully!"),
         ));
-        Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                Onboarding()), // Assuming MyHomePage is the name of your home page class
-        );
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //       builder: (context) =>
+        //           Onboarding()
+
+        //           ), // Assuming MyHomePage is the name of your home page class
+        // );
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Failed to submit ticket!"),
